@@ -34,8 +34,10 @@ export default function LandingPage() {
           })
         });
         const authData = await authRes.json();
-        token = authData.access_token;
-        localStorage.setItem('access_token', token);
+        token = authData.access_token || '';
+        if (token) {
+          localStorage.setItem('access_token', token);
+        }
       }
 
       const res = await fetch('https://gamma-0od0.onrender.com/api/v1/ai/generate', {
