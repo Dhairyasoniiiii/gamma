@@ -95,6 +95,8 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
+      console.log('🚀 Starting login...');
+      
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
@@ -107,18 +109,36 @@ export default function LoginPage() {
         body: formData.toString()
       });
       
+      console.log('📡 Response status:', res.status);
+      
       const data = await res.json();
+      console.log('📦 Response data:', data);
       
       if (!res.ok) {
+        console.error('❌ Login failed:', data.detail);
         throw new Error(data.detail || 'Invalid email or password');
       }
       
+      if (!data.access_token) {
+        console.error('❌ No access token in response');
+        throw new Error('No access token received');
+      }
+      
+      console.log('✅ Login successful!');
+      console.log('💾 Storing tokens...');
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
       
-      window.location.href = '/home';
+      console.log('🔑 Tokens stored successfully');
+      console.log('🏠 Redirecting to /home...');
+      
+      // Force redirect
+      setTimeout(() => {
+        window.location.href = '/home';
+      }, 100);
       
     } catch (error: any) {
+      console.error('💥 Login error:', error);
       setError(error.message || 'Failed to login');
       setLoading(false);
     }

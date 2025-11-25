@@ -89,6 +89,16 @@ export default function SignupPage() {
     e.preventDefault();
     setError('');
     
+    if (!name.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    
+    if (!email.trim()) {
+      setError('Please enter your email');
+      return;
+    }
+    
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
@@ -97,7 +107,8 @@ export default function SignupPage() {
     setLoading(true);
     
     try {
-      console.log('Sending registration request:', { name, email });
+      console.log('🚀 Starting registration...');
+      console.log('📝 Data:', { name, email, password: '***' });
       
       const res = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
         method: 'POST',
@@ -105,21 +116,36 @@ export default function SignupPage() {
         body: JSON.stringify({ name, email, password })
       });
       
+      console.log('📡 Response status:', res.status);
+      
       const data = await res.json();
-      console.log('Registration response:', data);
+      console.log('📦 Response data:', data);
       
       if (!res.ok) {
+        console.error('❌ Registration failed:', data.detail);
         throw new Error(data.detail || 'Registration failed');
       }
       
+      if (!data.access_token) {
+        console.error('❌ No access token in response');
+        throw new Error('No access token received');
+      }
+      
+      console.log('✅ Registration successful!');
+      console.log('💾 Storing tokens...');
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
       
-      console.log('Registration successful, redirecting to /home');
-      window.location.href = '/home';
+      console.log('🔑 Tokens stored successfully');
+      console.log('🏠 Redirecting to /home...');
+      
+      // Force redirect
+      setTimeout(() => {
+        window.location.href = '/home';
+      }, 100);
       
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error('💥 Registration error:', err);
       setError(err.message || 'Failed to register');
       setLoading(false);
     }
