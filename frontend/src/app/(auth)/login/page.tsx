@@ -1,14 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUserStore } from '@/store/userStore';
-import toast, { Toaster } from 'react-hot-toast';
+
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useUserStore();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -16,17 +19,101 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    // Load Google Sign-In script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '415749045380-vabasi37ntls7qsu5kkusah11uiff1dl.apps.googleusercontent.com',
+          callback: handleGoogleSignIn
+        });
+      }
+    };
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  const handleGoogleSignIn = async (response: any) => {
+    setError('');
     setLoading(true);
     
     try {
-      await login(formData.email, formData.password);
-      toast.success('Logged in successfully!');
-      router.push('/home');
+      const res = await fetch('https://gamma-0od0.onrender.com/api/v1/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.detail || 'Google sign-in failed');
+      }
+      
+      setSuccess('Signed in successfully! Redirecting...');
+      
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      
+      setTimeout(() => {
+        router.push('/home');
+      }, 1000);
+      
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    
+    try {
+      const formDataEncoded = new URLSearchParams();
+      formDataEncoded.append('username', formData.email);
+      formDataEncoded.append('password', formData.password);
+      
+      const res = await fetch('https://gamma-0od0.onrender.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formDataEncoded.toString()
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.detail || 'Invalid email or password');
+      }
+      
+      setSuccess('Logged in successfully! Redirecting...');
+      
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      
+      setTimeout(() => {
+        router.push('/home');
+      }, 1000);
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Invalid email or password');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -34,7 +121,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
-      <Toaster position="bottom-right" />
       
       <div className="w-full max-w-md">
         {/* Logo */}
@@ -44,6 +130,20 @@ export default function LoginPage() {
           </Link>
           <p className="text-gray-600 mt-2">Welcome back</p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+            {success}
+          </div>
+        )}
 
         {/* Form */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
@@ -123,7 +223,15 @@ export default function LoginPage() {
             <div className="mt-6 space-y-3">
               <button
                 type="button"
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  if (window.google) {
+                    window.google.accounts.id.prompt();
+                  } else {
+                    setError('Google Sign-In not loaded. Please refresh the page.');
+                  }
+                }}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -144,16 +252,6 @@ export default function LoginPage() {
                   />
                 </svg>
                 Continue with Google
-              </button>
-
-              <button
-                type="button"
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#00A4EF">
-                  <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z" />
-                </svg>
-                Continue with Microsoft
               </button>
             </div>
           </div>

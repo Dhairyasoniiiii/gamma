@@ -404,10 +404,11 @@ export default function SignupPage() {
           color: '#6B7280'
         }}>
           Already have an account?{' '}
-          <a href="/login" style={{
+          <a href="/login" onClick={(e) => { e.preventDefault(); router.push('/login'); }} style={{
             color: '#8B5CF6',
             fontWeight: '500',
-            textDecoration: 'none'
+            textDecoration: 'none',
+            cursor: 'pointer'
           }}>
             Sign in
           </a>
