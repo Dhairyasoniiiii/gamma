@@ -38,8 +38,7 @@ export default function LoginPage() {
             .then(data => {
               localStorage.setItem('access_token', data.access_token);
               localStorage.setItem('refresh_token', data.refresh_token);
-              alert('Signed in with Google! You can now generate presentations.');
-              window.location.href = '/';
+              window.location.href = '/dashboard';
             })
             .catch(() => setError('Google login failed'));
           }
@@ -81,8 +80,7 @@ export default function LoginPage() {
       if (res.ok && data.access_token) {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('refresh_token', data.refresh_token);
-        alert('Signed in! You can now generate presentations.');
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       } else {
         setError(data.detail || 'Login failed');
         setLoading(false);
