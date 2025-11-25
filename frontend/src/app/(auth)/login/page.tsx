@@ -38,7 +38,7 @@ export default function LoginPage() {
             .then(data => {
               localStorage.setItem('access_token', data.access_token);
               localStorage.setItem('refresh_token', data.refresh_token);
-              window.location.href = '/dashboard';
+              window.location.href = '/home';
             })
             .catch(() => setError('Google login failed'));
           }
@@ -80,7 +80,7 @@ export default function LoginPage() {
       if (res.ok && data.access_token) {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('refresh_token', data.refresh_token);
-        window.location.href = '/dashboard';
+        window.location.href = '/home';
       } else {
         setError(data.detail || 'Login failed');
         setLoading(false);
@@ -109,10 +109,10 @@ export default function LoginPage() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <h1 className="text-2xl font-semibold text-gray-900 text-center mb-2">
-            Sign in to Gamma
+            Welcome back
           </h1>
           <p className="text-sm text-gray-600 text-center mb-6">
-            Welcome back! Please sign in to continue
+            Sign in to continue creating beautiful presentations
           </p>
 
           {error && (
