@@ -75,7 +75,7 @@ export default function LoginPage() {
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
       
-      window.location.href = '/home';
+      window.location.replace('/');
       
     } catch (err: any) {
       setError(err.message || 'Failed to sign in with Google');
@@ -130,12 +130,10 @@ export default function LoginPage() {
       localStorage.setItem('refresh_token', data.refresh_token);
       
       console.log('🔑 Tokens stored successfully');
-      console.log('🏠 Redirecting to /home...');
+      console.log('🏠 Redirecting to /...');
       
-      // Force redirect
-      setTimeout(() => {
-        window.location.href = '/home';
-      }, 100);
+      // Redirect to homepage
+      window.location.replace('/');
       
     } catch (error: any) {
       console.error('💥 Login error:', error);

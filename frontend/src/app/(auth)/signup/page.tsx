@@ -76,7 +76,7 @@ export default function SignupPage() {
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
       
-      window.location.href = '/home';
+      window.location.replace('/');
       
     } catch (err: any) {
       console.error('Google sign-up error:', err);
@@ -137,12 +137,10 @@ export default function SignupPage() {
       localStorage.setItem('refresh_token', data.refresh_token);
       
       console.log('🔑 Tokens stored successfully');
-      console.log('🏠 Redirecting to /home...');
+      console.log('🏠 Redirecting to /...');
       
-      // Force redirect
-      setTimeout(() => {
-        window.location.href = '/home';
-      }, 100);
+      // Redirect to homepage
+      window.location.replace('/');
       
     } catch (err: any) {
       console.error('💥 Registration error:', err);

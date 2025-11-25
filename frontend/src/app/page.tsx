@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Sparkles, Zap, Users, TrendingUp, Check, ChevronDown, Play } from 'lucide-react';
@@ -10,6 +10,15 @@ export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // If user is logged in, redirect to home
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      console.log('✅ User is logged in, redirecting to /home');
+      router.push('/home');
+    }
+  }, [router]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
