@@ -1,0 +1,105 @@
+# Security - Never commit sensitive files
+.env
+.env.local
+.env.production
+*.key
+*.pem
+*.p12
+*.pfx
+*.cert
+*.crt
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+gamma_clone.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Uploads / Storage
+storage/
+uploads/
+media/
+
+# Secrets Management
+secrets.json
+credentials.json
+service-account.json
+
+# Docker
+.dockerignore
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Redis dump
+dump.rdb
+
+# Node modules (frontend)
+node_modules/
+.next/
+.nuxt/
+dist/
+
+# Backup files
+*.backup
+*.old

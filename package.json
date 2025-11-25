@@ -1,0 +1,12 @@
+{
+  "name": "gamma-backend",
+  "version": "1.0.0",
+  "description": "Gamma Clone Backend",
+  "main": "backend/main.py",
+  "scripts": {
+    "start": "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+  },
+  "engines": {
+    "python": "3.9.x"
+  }
+}
