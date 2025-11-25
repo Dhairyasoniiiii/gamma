@@ -39,7 +39,8 @@ export default function SignupPage() {
             .then(data => {
               localStorage.setItem('access_token', data.access_token);
               localStorage.setItem('refresh_token', data.refresh_token);
-              window.location.href = '/home';
+              alert('Signed up with Google! You can now generate presentations.');
+              window.location.href = '/';
             })
             .catch(() => setError('Google signup failed'));
           }
@@ -77,7 +78,8 @@ export default function SignupPage() {
       if (res.ok && data.access_token) {
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('refresh_token', data.refresh_token);
-        window.location.href = '/home';
+        alert('Account created! You can now generate presentations.');
+        window.location.href = '/';
       } else {
         setError(data.detail || 'Signup failed');
         setLoading(false);

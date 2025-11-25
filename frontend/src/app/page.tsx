@@ -12,11 +12,10 @@ export default function LandingPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // If user is logged in, redirect to home
+    // Check if user is logged in - don't redirect, just note it
     const token = localStorage.getItem('access_token');
     if (token) {
-      console.log('✅ User is logged in, redirecting to /home');
-      router.push('/home');
+      console.log('User is logged in');
     }
   }, [router]);
 
