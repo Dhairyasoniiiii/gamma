@@ -177,21 +177,48 @@ async def google_auth(token: dict, db: Session = Depends(get_db)):
     - Creates account if new user
     - Returns JWT tokens
     """
-    from google.oauth2 import id_token
-    from google.auth.transport import requests
+    import requests
+    import json
     
     try:
-        # Verify token with Google
-        idinfo = id_token.verify_oauth2_token(
-            token.get('credential'),
-            requests.Request(),
-            settings.GOOGLE_CLIENT_ID
+        # Verify token with Google's tokeninfo endpoint
+        credential = token.get('credential')
+        if not credential:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Missing credential"
+            )
+        
+        # Verify the token with Google
+        response = requests.get(
+            f'https://oauth2.googleapis.com/tokeninfo?id_token={credential}'
         )
+        
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid Google token"
+            )
+        
+        idinfo = response.json()
+        
+        # Verify audience matches our client ID
+        if settings.GOOGLE_CLIENT_ID and idinfo.get('aud') != settings.GOOGLE_CLIENT_ID:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token audience"
+            )
         
         email = idinfo.get('email')
         name = idinfo.get('name')
         google_id = idinfo.get('sub')
         avatar_url = idinfo.get('picture')
+        
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email not provided by Google"
+            )
         
         # Find or create user
         user = db.query(User).filter(User.email == email).first()
@@ -200,7 +227,7 @@ async def google_auth(token: dict, db: Session = Depends(get_db)):
             # Create new user
             user = User(
                 email=email,
-                name=name,
+                name=name or email.split('@')[0],
                 google_id=google_id,
                 oauth_provider='google',
                 avatar_url=avatar_url,
@@ -228,11 +255,8 @@ async def google_auth(token: dict, db: Session = Depends(get_db)):
             "token_type": "bearer"
         }
         
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Google token"
-        )
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(
