@@ -30,7 +30,7 @@ export default function SignupPage() {
     script.onload = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: '1050704579669-3b0bhbm9h9l9m8k9k9k9k9k9k9k9k9k9.apps.googleusercontent.com', // Replace with your client ID
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '1050704579669-3b0bhbm9h9l9m8k9k9k9k9k9k9k9k9k9.apps.googleusercontent.com',
           callback: handleGoogleSignIn
         })
       }
@@ -46,7 +46,7 @@ export default function SignupPage() {
     setLoading(true)
     
     try {
-      const res = await fetch('http://localhost:8000/api/v1/auth/google', {
+      const res = await fetch('https://gamma-0od0.onrender.com/api/v1/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: response.credential })
