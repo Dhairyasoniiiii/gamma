@@ -81,7 +81,9 @@ def decode_access_token(token: str) -> Optional[dict]:
 def create_refresh_token(user_id: str) -> str:
     """Create refresh token for long-term sessions"""
     data = {"sub": user_id, "type": "refresh"}
-    expires_delta = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    # Use REFRESH_TOKEN_EXPIRE_MINUTES if available, otherwise fallback to DAYS
+    minutes = getattr(settings, 'REFRESH_TOKEN_EXPIRE_MINUTES', settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60)
+    expires_delta = timedelta(minutes=minutes)
     return create_access_token(data, expires_delta)
 
 
