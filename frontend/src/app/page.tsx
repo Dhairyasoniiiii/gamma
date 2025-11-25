@@ -1,9 +1,65 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Sparkles, Zap, Users, TrendingUp, Check, ChevronDown, Play } from 'lucide-react';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [prompt, setPrompt] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      setError('Please enter a topic');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      let token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        const authRes = await fetch('https://gamma-0od0.onrender.com/api/v1/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Guest User',
+            email: `guest${Date.now()}@temp.com`,
+            password: 'guestpass123'
+          })
+        });
+        const authData = await authRes.json();
+        token = authData.access_token;
+        localStorage.setItem('access_token', token);
+      }
+
+      const res = await fetch('https://gamma-0od0.onrender.com/api/v1/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          num_cards: 8
+        })
+      });
+
+      const data = await res.json();
+      router.push(`/editor/${data.presentation_id}`);
+      
+    } catch (err: any) {
+      setError('Generation failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation - Exact Gamma Style */}
@@ -64,13 +120,24 @@ export default function LandingPage() {
             <div className="relative group">
               <input
                 type="text"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleGenerate()}
                 placeholder="Enter a topic, paste text, or drop a file..."
+                disabled={loading}
                 className="w-full h-[62px] px-6 pr-36 text-[16px] rounded-[16px] border-2 border-gray-200 hover:border-gray-300 focus:border-purple-500 focus:outline-none shadow-sm hover:shadow-md focus:shadow-lg transition-all bg-white"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 h-[48px] px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[15px] font-semibold rounded-xl hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                Generate →
+              <button 
+                onClick={handleGenerate}
+                disabled={loading}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-[48px] px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[15px] font-semibold rounded-xl hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Generating...' : 'Generate →'}
               </button>
             </div>
+            {error && (
+              <p className="text-[14px] text-red-500 mt-3">{error}</p>
+            )}
             <p className="text-[14px] text-gray-500 mt-3">
               Try: "Create a pitch deck for a sustainable fashion startup"
             </p>
