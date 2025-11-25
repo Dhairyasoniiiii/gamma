@@ -233,7 +233,7 @@ async def google_auth(token: dict, db: Session = Depends(get_db)):
                 avatar_url=avatar_url,
                 plan='free',
                 credits_remaining=settings.CREDITS_FREE_PLAN,
-                email_verified=True
+                is_verified=True
             )
             db.add(user)
             db.commit()
