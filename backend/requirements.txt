@@ -68,7 +68,6 @@ aiohttp==3.9.3
 requests==2.31.0
 
 # Data Validation & Processing
-pydantic==2.5.3
 python-dateutil==2.8.2
 
 # Monitoring & Logging
